@@ -1,3 +1,4 @@
+import 'package:curso_alura_2/components/response_dialog.dart';
 import 'package:curso_alura_2/components/transaction_auth_dialog.dart';
 import 'package:curso_alura_2/http/webclients/TransactionWebClient.dart';
 import 'package:flutter/material.dart';
@@ -90,8 +91,22 @@ class _TransactionFormState extends State<TransactionForm> {
       Transaction transactionCreated, String password, BuildContext context) {
     _webClient.save(transactionCreated, password).then(
       (transaction) {
-        Navigator.of(context).pop(transaction);
+        showDialog(
+            context: context,
+            builder: (contextDialog) {
+              return SuccessDialog('successful transaction');
+            }).then((value) => Navigator.of(context).pop(transaction));
       },
+    ).catchError(
+      (e) {
+        showDialog(
+            context: context,
+            builder: (contextDialog) {
+              return FailureDialog(e.message);
+            });
+      },
+      test: (e) => e
+          is Exception, // serve para testar se o erro é uma exceção  e não um erro de conexão
     );
   }
 }
