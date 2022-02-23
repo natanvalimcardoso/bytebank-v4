@@ -19,7 +19,7 @@ class MyApp extends StatelessWidget {
           secondary: Colors.green[900],
         ),
       ),
-      home: TransactionAuthDialog(),
+      home: Dashboard(),
       debugShowCheckedModeBanner: false,
     );
   }
