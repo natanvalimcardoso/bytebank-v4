@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:curso_alura_2/components/response_dialog.dart';
 import 'package:curso_alura_2/components/transaction_auth_dialog.dart';
 import 'package:curso_alura_2/http/webclients/TransactionWebClient.dart';
@@ -87,26 +89,41 @@ class _TransactionFormState extends State<TransactionForm> {
     );
   }
 
-  void _save(
-      Transaction transactionCreated, String password, BuildContext context) {
-    _webClient.save(transactionCreated, password).then(
-      (transaction) {
-        showDialog(
-            context: context,
-            builder: (contextDialog) {
-              return SuccessDialog('successful transaction');
-            }).then((value) => Navigator.of(context).pop(transaction));
+  void _save(Transaction transactionCreated, String password,
+      BuildContext context) async {
+    final Transaction transaction = await _webClient.save(transactionCreated, password)
+    
+    .catchError(
+      (e) {
+        _showFailureMessage(context, message: 'Timeout submitting transaction'); 
       },
+      test: (e) => e is TimeoutException, // serve para testar se o erro é de timeout
     ).catchError(
       (e) {
-        showDialog(
-            context: context,
-            builder: (contextDialog) {
-              return FailureDialog(e.message);
-            });
+       _showFailureMessage(context, message: e.message);
       },
-      test: (e) => e
-          is Exception, // serve para testar se o erro é uma exceção  e não um erro de conexão
+      test: (e) => e is Exception, // serve para testar se o erro é uma exceção  e não um erro de conexão
     );
+    
+    Navigator.of(context).pop(transaction);
+    _sucessDialog(context);
+  }
+
+ 
+//* Métodos criados falhas
+ void _showFailureMessage(BuildContext context, {required String message}) {
+    showDialog(
+        context: context,
+        builder: (contextDialog) {
+          return FailureDialog(message);
+        });
+  }
+//* Métodos criados sucesso
+  void _sucessDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (contextDialog) {
+          return SuccessDialog('successful transaction');
+        });
   }
 }
